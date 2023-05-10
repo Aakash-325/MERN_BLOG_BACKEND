@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import blogRouter from './routes/blog-routes';
 import router from './routes/user-routes';
@@ -15,5 +15,5 @@ app.use("/api/blog", blogRouter);
 mongoose.set('strictQuery', false);
 mongoose.connect('mongodb+srv://Akash:Easypeasy69@blogapp.rdayjnn.mongodb.net/?retryWrites=true&w=majority')
     .then(() => app.listen(process.env.PORT || 3000))
-    .then(() => console.log("Connected to Database and server started on port 5000"))
+    .then(() => console.log("Connected to Database and server started on port 3000"))
     .catch((err) => (console.log(err)));

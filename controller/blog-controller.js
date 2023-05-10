@@ -3,7 +3,7 @@ import Blog from "../model/Blog";
 import User from "../model/User";
 
 export const getAllBlog = async (req, res, next) => {
-    let blogs;
+    let blogs; 
     try {
         blogs = await Blog.find().populate('user');
     } catch {
@@ -87,22 +87,27 @@ export const getById = async (req, res, next) => {
     return res.status(200).json({ blog });
 }
 
+
 export const deleteBlog = async (req, res, next) => {
     const id = req.params.id;
-    let blog;
     try {
-        blog = await Blog.findByIdAndRemove(id).populate("user");
-        await blog.user.blogs.pull(blog);
-        await blog.user.save();
+      const blog = await Blog.findByIdAndRemove(id).populate("user");
+  
+      if (!blog) {
+        return res.status(404).json({ message: "Blog not found!" });
+      }
+  
+      const user = blog.user;
+      user.blogs.pull(blog);
+      await user.save();
+  
+      return res.status(200).json({ message: "Deleted successfully!" });
     } catch (err) {
-        console.log(err); 
+      console.log(err);
+      return res.status(500).json({ message: "Unable to delete!" });
     }
-    if (!blog) {
-        return res.status(500).json({ message: "Unable to delete!" });
-    }
+  };
 
-    return res.status(200).json({ message: "Deleted succesfully!" });
-}
 
 export const getByUserId = async (req, res, next) => {
     const userId = req.params.id;

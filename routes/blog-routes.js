@@ -2,7 +2,7 @@ import express from "express";
 import { addBlog, deleteBlog, getAllBlog, getById, getByUserId, updateBlog } from "../controller/blog-controller";
 
 const blogRouter = express.Router();
-
+ 
 blogRouter.get("/", getAllBlog);
 blogRouter.post("/add", addBlog);
 blogRouter.put("/update/:id", updateBlog);

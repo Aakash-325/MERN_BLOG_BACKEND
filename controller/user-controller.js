@@ -2,58 +2,73 @@ import User from "../model/User";
 import bcrypt from "bcryptjs";
 
 export const getAllUser = async (req, res, next) => {
-    let users;
-    try{
-        users = await User.find();
-    }catch(err){
-        console.log(err);
+  let users;
+  try {
+    users = await User.find();
+  } catch (err) {
+    console.log(err);
+  }
+  if (!users) {
+    return res.status(404).json({ message: "user not found!" });
+  }
+  return res.status(200).json({ users });
+};
+
+export const getUser = async (req, res, next) => {
+    const {email} = req.body;
+    let user;
+    try {
+      user = await User.find({email});
+    } catch (err) {
+      console.log(err);
     }
-    if(!users){
-        return res.status(404).json({message:"user not found!"})
+    if (!user) {
+      return res.status(404).json({ message: "user not found!" });
     }
-    return res.status(200).json({users})
-}
+    return res.status(200).json({ user });
+  };
+
 
 export const signup = async (req, res, next) => {
-    const{name, email, password} = req.body;
-// receiving data from frontend from user
+  const { name, email, password } = req.body;
+  // receiving data from frontend from user
 
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email });
+  } catch (err) {
+    return console.log(err);
+  }
 
-    let existingUser;
-    try{
-        existingUser = await User.findOne({email});
-    }catch(err){
-        return console.log(err);
-    }
+  // checking if user already exist in database using email as filter
 
-// checking if user already exist in database using email as filter
+  if (existingUser) {
+    return res
+      .status(400)
+      .json({ message: "User already Exists! Login instead." });
+  }
 
-    if(existingUser){
-        return res.status(400).json({message:"User already Exists! Login instead."})
-    }
+  // if user already exist in db then sending already exist
 
-// if user already exist in db then sending already exist
+  const hashedpassword = bcrypt.hashSync(password);
 
-    const hashedpassword = bcrypt.hashSync(password);
+  const user = new User({
+    name,
+    email,
+    password: hashedpassword,
+    blogs: [],
+  });
 
-    const user = new User({
-        name,
-        email,
-        password: hashedpassword,
-        blogs:[]
-    });
+  // if user does not exist in db then creating new user
 
-// if user does not exist in db then creating new user
+  try {
+    await user.save();
+  } catch (err) {
+    return console.log(err);
+  }
 
-    try{
-        await user.save();
-    }catch(err){
-        return console.log(err);
-    }
-    
-    return res.status(201).json({user})
-}
-
+  return res.status(201).json({ user });
+};
 
 export const login = async (req, res, next) => {
     const {email, password} = req.body
